@@ -6,20 +6,21 @@ def main():
     q_agent_policy = ConstantEpsilonFunction(0.2)
     random_agent = RandomAgent(-1)
     q_agent = QAgent(1, "", q_agent_policy)
+    agents = [random_agent, q_agent][::-1]
+    for i in range(0, 5_000):
+        env = Environment(agents)
+        while not env.is_over:
+            for p in agents:
+                board_state = env.get_board_hash()
+                empty_cells = env.get_empty_cells()
+                action = p.get_action(empty_cells, board_state)
+                env.set_action(p, action)
+                if env.is_over:
+                    break
+        if i % 100:
+            print(q_agent.reward, q_agent.amount_of_wins)
+            print(random_agent.reward, random_agent.amount_of_wins)
 
-    env = Environment([random_agent, q_agent])
-    while not env.is_over:
-        board_state = env.get_board_hash()
-        empty_cells = env.get_empty_cells()
-        # print(empty_cells)
-        action_q = q_agent.get_action(empty_cells, board_state)
-        # print("HERE", action_q)
-        env.set_action(q_agent, action_q)
-        print(env.board)
-        empty_cells = env.get_empty_cells()
-        action_r = random_agent.get_action(empty_cells)
-        env.set_action(random_agent, action_r)
-        print(env.board)
-
+    q_agent.dump_q_matrix("q_matrix.pkl")
 if __name__ == "__main__":
     main()

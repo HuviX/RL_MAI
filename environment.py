@@ -40,20 +40,13 @@ class Environment:
         # Если не выполняется, то игра продолжается
         return False, np.where(board == 0)[0].size
 
-    def _feed_rewards(self):
+    def _feed_rewards(self, agent):
         win, empties = self._check_if_game_is_over()
         if win:
-            if self.num_actions % 2 == 0:
-                self.agent1.set_reward(0.)
-                self.agent2.set_reward(1.)
-            else:
-                self.agent1.set_reward(1.)
-                self.agent2.set_reward(0.)
+            agent.set_reward(1.)
             self.is_over = True
         else:
-            # print("HERE")
-            self.agent1.set_reward(0.1)
-            self.agent2.set_reward(0.1)
+            agent.set_reward(0.1)
         if empties == 0:
             self.is_over = True
 
@@ -68,5 +61,6 @@ class Environment:
         self.board = board.reshape((3, 3))
     
     def set_action(self, agent, cell):
+        # print(agent.sign)
         self._set_sign(agent.sign, cell)
-        self._feed_rewards()
+        self._feed_rewards(agent)
