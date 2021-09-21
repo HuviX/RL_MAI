@@ -13,12 +13,12 @@ class BaseAgent:
     def get_action(self, env):
         raise NotImplementedError(
             "You can't call method from an abstract class itself"
-        )  # noqa
+        )
 
     def set_reward(self, reward: int, state, done: bool):
         raise NotImplementedError(
             "You can't call method from an abstract class itself"
-        )  # noqa
+        )
 
 
 class RandomAgent(BaseAgent):
@@ -55,9 +55,8 @@ class QAgent(BaseAgent):
         self.amount_of_wins = 0
         self._init_q_matrix()
 
-    def get_action(self, empty_cells, board_state):
+    def get_action(self, empty_cells: np.ndarray, board_state: str) -> int:
         threshold = self.epsilon_policy.get_epsilon()
-        # print("HERE", threshold)
         if random.uniform(0, 1) < threshold:
             action = self._explore(empty_cells, board_state)
         else:
@@ -76,7 +75,7 @@ class QAgent(BaseAgent):
         q_values[last_move] = q_value
         self.q_matrix[self.last_board_state] = q_values
 
-    def _exploit(self, empty_cells, board_state):
+    def _exploit(self, empty_cells: np.ndarray, board_state: str) -> int:
         q_values = self.q_matrix[board_state]
         possible_movements = q_values[empty_cells]
         movement = np.argmax(possible_movements)
@@ -85,7 +84,7 @@ class QAgent(BaseAgent):
         self.last_board_state = board_state
         return move
 
-    def _explore(self, empty_cells, board_state):
+    def _explore(self, empty_cells: np.ndarray, board_state: str) -> int:
         move = np.random.choice(empty_cells)
         # print(move)
         self.last_move = move

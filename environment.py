@@ -2,6 +2,8 @@ from typing import Tuple
 
 import numpy as np
 
+from agent import BaseAgent
+
 
 class Environment:
     def __init__(self):
@@ -32,7 +34,7 @@ class Environment:
         # Если не выполняется, то игра продолжается
         return False, np.where(board == 0)[0].size
 
-    def _feed_rewards(self, agent):
+    def _feed_rewards(self, agent: BaseAgent):
         win, empties = self._check_if_game_is_over()
         if win:
             agent.set_reward(1.0)
@@ -46,13 +48,12 @@ class Environment:
         board = self.board.ravel()
         return np.where(board == 0)[0]
 
-    def _set_sign(self, sign, cell):
+    def _set_sign(self, sign: int, cell: int):
         self.num_actions += 1
         board = self.board.ravel()
         board[cell] = sign
         self.board = board.reshape((3, 3))
 
-    def set_action(self, agent, cell):
-        # print(agent.sign)
+    def set_action(self, agent: BaseAgent, cell: int):
         self._set_sign(agent.sign, cell)
         self._feed_rewards(agent)
