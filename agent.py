@@ -1,8 +1,8 @@
+import pickle
 from collections import defaultdict
 
 import numpy as np
 from numpy import random
-import pickle
 
 
 class BaseAgent:
@@ -11,16 +11,20 @@ class BaseAgent:
         self.file_name = file_name
 
     def get_action(self, env):
-        raise NotImplementedError("You can't call method from an abstract class itself") # noqa
+        raise NotImplementedError(
+            "You can't call method from an abstract class itself"
+        )  # noqa
 
     def set_reward(self, reward: int, state, done: bool):
-        raise NotImplementedError("You can't call method from an abstract class itself") # noqa
+        raise NotImplementedError(
+            "You can't call method from an abstract class itself"
+        )  # noqa
 
 
 class RandomAgent(BaseAgent):
     def __init__(self, sign: int):
         self.sign = sign
-        self.reward = 0.
+        self.reward = 0.0
         self.amount_of_wins = 0
 
     def get_action(self, empty_cells, *args):
@@ -37,17 +41,19 @@ class RandomAgent(BaseAgent):
         move = np.random.choice(empty_cells)
         return move
 
+
 class QAgent(BaseAgent):
-    def __init__(self, sign: int, file_name: str, epsilon_policy, lr: float = 0.1):
+    def __init__(
+        self, sign: int, file_name: str, epsilon_policy, lr: float = 0.1
+    ):
         self.sign = sign
         self.file_name = file_name
         self.epsilon_policy = epsilon_policy
         self.lr = lr
         self.decay_gamma = 0.9
-        self.reward = 0.
+        self.reward = 0.0
         self.amount_of_wins = 0
         self._init_q_matrix()
-
 
     def get_action(self, empty_cells, board_state):
         threshold = self.epsilon_policy.get_epsilon()
@@ -69,7 +75,6 @@ class QAgent(BaseAgent):
         q_value += self.lr * (self.decay_gamma * reward - q_value)
         q_values[last_move] = q_value
         self.q_matrix[self.last_board_state] = q_values
-        
 
     def _exploit(self, empty_cells, board_state):
         q_values = self.q_matrix[board_state]
@@ -89,7 +94,7 @@ class QAgent(BaseAgent):
 
     def _init_q_matrix(self):
         self.q_matrix = defaultdict(lambda: np.zeros(9, dtype=float))
-    
+
     def dump_q_matrix(self, filename: str):
         q_matrix = dict(self.q_matrix)
         with open(filename, "wb") as f:

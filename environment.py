@@ -1,16 +1,10 @@
-from agent import BaseAgent
-from typing import List, Tuple
+from typing import Tuple
 
-from collections import defaultdict
 import numpy as np
-from numpy import random
-
-from agent import BaseAgent
 
 
 class Environment:
-    def __init__(self, agents: List[BaseAgent]):
-        self.agent1, self.agent2 = agents
+    def __init__(self):
         self.board = np.zeros((3, 3), dtype=int)
         self.num_actions = 0
         self.is_over = False
@@ -23,15 +17,13 @@ class Environment:
     def _check_if_game_is_over(self) -> Tuple[bool]:
         diagonal = self.board.diagonal()
         anti_diag = np.fliplr(self.board).diagonal()
-        combinations_sum = (
-            np.abs(
-                np.r_[
-                    diagonal.sum(),
-                    anti_diag.sum(),
-                    np.sum(self.board, axis=0),
-                    np.sum(self.board, axis=1)
-                ]
-            )
+        combinations_sum = np.abs(
+            np.r_[
+                diagonal.sum(),
+                anti_diag.sum(),
+                np.sum(self.board, axis=0),
+                np.sum(self.board, axis=1),
+            ]
         )
         board = self.board.ravel()
         # Проверим если какой-либо из игроков выиграл
@@ -43,7 +35,7 @@ class Environment:
     def _feed_rewards(self, agent):
         win, empties = self._check_if_game_is_over()
         if win:
-            agent.set_reward(1.)
+            agent.set_reward(1.0)
             self.is_over = True
         else:
             agent.set_reward(0.1)
@@ -59,7 +51,7 @@ class Environment:
         board = self.board.ravel()
         board[cell] = sign
         self.board = board.reshape((3, 3))
-    
+
     def set_action(self, agent, cell):
         # print(agent.sign)
         self._set_sign(agent.sign, cell)

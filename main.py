@@ -1,4 +1,4 @@
-from agent import QAgent, ConstantEpsilonFunction, RandomAgent
+from agent import ConstantEpsilonFunction, QAgent, RandomAgent
 from environment import Environment
 
 
@@ -8,7 +8,7 @@ def main():
     q_agent = QAgent(1, "", q_agent_policy)
     agents = [random_agent, q_agent][::-1]
     for i in range(0, 5_000):
-        env = Environment(agents)
+        env = Environment()
         while not env.is_over:
             for p in agents:
                 board_state = env.get_board_hash()
@@ -22,5 +22,7 @@ def main():
             print(random_agent.reward, random_agent.amount_of_wins)
 
     q_agent.dump_q_matrix("q_matrix.pkl")
+
+
 if __name__ == "__main__":
     main()
