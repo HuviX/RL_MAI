@@ -27,13 +27,14 @@ class RandomAgent(BaseAgent):
         self.reward = 0.0
         self.amount_of_wins = 0
 
-    def get_action(self, empty_cells, *args):
+    def get_action(self, state):
+        empty_cells, _ = state
         # print(empty_cells)
         action = self._explore(empty_cells)
-        return action
+        return (action, self.sign)
 
     def set_reward(self, reward):
-        if reward > 0.5:
+        if reward == 1:
             self.amount_of_wins += 1
         self.reward += reward
 
@@ -55,17 +56,18 @@ class QAgent(BaseAgent):
         self.amount_of_wins = 0
         self._init_q_matrix()
 
-    def get_action(self, empty_cells: np.ndarray, board_state: str) -> int:
+    def get_action(self, state) -> int:
+        empty_cells, board_state = state
         threshold = self.epsilon_policy.get_epsilon()
         if random.uniform(0, 1) < threshold:
             action = self._explore(empty_cells, board_state)
         else:
             action = self._exploit(empty_cells, board_state)
-        return action
+        return (action, self.sign)
 
     def set_reward(self, reward: float):
         self.reward += reward
-        if reward > 0.5:
+        if reward == 1:
             self.amount_of_wins += 1
         board_state = self.last_board_state
         last_move = self.last_move

@@ -2,16 +2,30 @@ from typing import Tuple
 
 import numpy as np
 
-from agent import BaseAgent
 
-
-class Environment:
+class TicTacEnvironment:
     def __init__(self):
         self.board = np.zeros((3, 3), dtype=int)
         self.num_actions = 0
         self.is_over = False
 
-    def get_board_hash(self):
+    def reset(self):
+        self.__init__()
+        return self._get_state()
+
+    def step(self, action: Tuple[int]):
+        cell, sign = action
+        self._set_sign(cell, sign)
+        reward = self._get_reward()
+        empty_cells, board_state = self._get_state()
+        return reward, (empty_cells, board_state)
+
+    def _get_state(self):
+        empty_cells = self._get_empty_cells()
+        board_state = self._get_board_state()
+        return empty_cells, board_state
+
+    def _get_board_state(self):
         state = self.board.ravel().astype(str).tolist()
         state = "".join(state)
         return state
@@ -28,32 +42,29 @@ class Environment:
             ]
         )
         board = self.board.ravel()
-        # Проверим если какой-либо из игроков выиграл
+
         if any(np.abs(combinations_sum) == 3):
             return True, np.where(board == 0)[0].size
-        # Если не выполняется, то игра продолжается
+
         return False, np.where(board == 0)[0].size
 
-    def _feed_rewards(self, agent: BaseAgent):
+    def _get_reward(self):
         win, empties = self._check_if_game_is_over()
         if win:
-            agent.set_reward(1.0)
             self.is_over = True
+            reward = 1.0
         else:
-            agent.set_reward(0.1)
+            reward = 0.1
         if empties == 0:
             self.is_over = True
+        return reward
 
-    def get_empty_cells(self):
+    def _get_empty_cells(self):
         board = self.board.ravel()
         return np.where(board == 0)[0]
 
-    def _set_sign(self, sign: int, cell: int):
+    def _set_sign(self, cell: int, sign: int):
         self.num_actions += 1
         board = self.board.ravel()
         board[cell] = sign
         self.board = board.reshape((3, 3))
-
-    def set_action(self, agent: BaseAgent, cell: int):
-        self._set_sign(agent.sign, cell)
-        self._feed_rewards(agent)
