@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 import numpy as np
 
@@ -9,18 +9,17 @@ class TicTacEnvironment:
         self.num_actions = 0
         self.is_over = False
 
-    def reset(self):
+    def reset(self) -> Tuple[ np.ndarray, str]:
         self.__init__()
         return self._get_state()
 
-    def step(self, action: Tuple[int]):
-        cell, sign = action
+    def step(self, cell: int, sign: int) -> Tuple[int, np.ndarray, str]:
         self._set_sign(cell, sign)
         reward = self._get_reward()
         empty_cells, board_state = self._get_state()
-        return reward, (empty_cells, board_state)
+        return reward, (empty_cells, board_state), self.is_over
 
-    def _get_state(self):
+    def _get_state(self) -> Tuple[ np.ndarray, str]:
         empty_cells = self._get_empty_cells()
         board_state = self._get_board_state()
         return empty_cells, board_state
@@ -30,7 +29,7 @@ class TicTacEnvironment:
         state = "".join(state)
         return state
 
-    def _check_if_game_is_over(self) -> Tuple[bool]:
+    def _check_if_game_is_over(self) -> Tuple[bool, int]:
         diagonal = self.board.diagonal()
         anti_diag = np.fliplr(self.board).diagonal()
         combinations_sum = np.abs(
@@ -48,7 +47,7 @@ class TicTacEnvironment:
 
         return False, np.where(board == 0)[0].size
 
-    def _get_reward(self):
+    def _get_reward(self) -> int:
         win, empties = self._check_if_game_is_over()
         if win:
             self.is_over = True
@@ -59,7 +58,7 @@ class TicTacEnvironment:
             self.is_over = True
         return reward
 
-    def _get_empty_cells(self):
+    def _get_empty_cells(self) -> np.ndarray:
         board = self.board.ravel()
         return np.where(board == 0)[0]
 
