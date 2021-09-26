@@ -1,7 +1,8 @@
+from collections import defaultdict
 from typing import Tuple
+
 from agent import ConstantEpsilonFunction, QAgent, RandomAgent
 from tictacenv import TicTacEnvironment
-from collections import defaultdict
 
 
 def play_random_x_rounds(

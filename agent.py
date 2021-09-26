@@ -1,7 +1,6 @@
-from typing import Tuple
-
 import pickle
 from collections import defaultdict
+from typing import Tuple
 
 import numpy as np
 from numpy import random
@@ -27,7 +26,7 @@ class RandomAgent(BaseAgent):
     def __init__(self, sign: int):
         """Creates agent instance.
         This agent movements are random all the time
-        
+
         Args:
             sign: sign to play (-1 or 1)
         Returns:
@@ -56,8 +55,8 @@ class QAgent(BaseAgent):
         self, sign: int, file_name: str, epsilon_policy, lr: float = 0.1
     ):
         """Creates agent instance. Agent movements random are not random
-        all the time. Randomness controls by an `epsilon_policy` arg. 
-        
+        all the time. Randomness controls by an `epsilon_policy` arg.
+
         Args:
             sign: sign to play (-1 or 1)
             file_name: file_name to store q matrix after learning
@@ -77,7 +76,9 @@ class QAgent(BaseAgent):
         self._init_q_matrix()
 
     def get_action(
-        self, empty_cells: np.ndarray, board_state: str,
+        self,
+        empty_cells: np.ndarray,
+        board_state: str,
         policy_value: float = None,
     ) -> Tuple[int, int]:
         """Returns an action based on a board state and empty cells
@@ -86,7 +87,7 @@ class QAgent(BaseAgent):
         Args:
             empty_cells: list of empty cells on a tic tac toe board
             board_state: string representing a current state in a board
-            policy_value: float value for testing purposes 
+            policy_value: float value for testing purposes
         Returns:
             action: index of cell
             sign: sign to be placed on an action cell
@@ -100,7 +101,7 @@ class QAgent(BaseAgent):
 
     def set_reward(self, reward: float):
         """Performs reward processing and learning process
-        
+
         Args:
             reward: reward value
         """
@@ -112,19 +113,21 @@ class QAgent(BaseAgent):
         q_values = self.q_matrix[board_state]
         q_value = q_values[last_move]
         max_q_value = np.max(q_values)
-        new_q_value = (1 - self.lr) * q_value + self.lr * (reward + self.discount * max_q_value)
+        new_q_value = (1 - self.lr) * q_value + self.lr * (
+            reward + self.discount * max_q_value
+        )
         # q_value += self.lr * (self.decay_gamma * reward - q_value)
         q_values[last_move] = new_q_value
         self.q_matrix[self.last_board_state] = q_values
 
     def _exploit(self, empty_cells: np.ndarray, board_state: str) -> int:
         """Performs action choice based on a q matrix
-        
+
         Args:
             empty_cells: list of empty cells on a tic tac toe board
             board_state: string representing a current state in a board
         Returns:
-            move: index of cell 
+            move: index of cell
         """
         q_values = self.q_matrix[board_state]
         possible_movements = q_values[empty_cells]
@@ -136,12 +139,12 @@ class QAgent(BaseAgent):
 
     def _explore(self, empty_cells: np.ndarray, board_state: str) -> int:
         """Performs action choice based on random choice
-        
+
         Args:
             empty_cells: list of empty cells on a tic tac toe board
             board_state: string representing a current state in a board
         Returns:
-            move: index of cell 
+            move: index of cell
         """
         move = np.random.choice(empty_cells)
         self.last_move = move
@@ -158,7 +161,7 @@ class QAgent(BaseAgent):
         """Dumps q matrix to a file.
 
         Args:
-            filename: file to store q matrix 
+            filename: file to store q matrix
         """
         q_matrix = dict(self.q_matrix)
         with open(filename, "wb") as f:
