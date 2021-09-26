@@ -9,7 +9,7 @@ class TicTacEnvironment:
         self.num_actions = 0
         self.is_over = False
 
-    def reset(self) -> Tuple[ np.ndarray, str]:
+    def reset(self) -> Tuple[np.ndarray, str]:
         self.__init__()
         return self._get_state()
 
@@ -19,7 +19,7 @@ class TicTacEnvironment:
         empty_cells, board_state = self._get_state()
         return reward, (empty_cells, board_state), self.is_over
 
-    def _get_state(self) -> Tuple[ np.ndarray, str]:
+    def _get_state(self) -> Tuple[np.ndarray, str]:
         empty_cells = self._get_empty_cells()
         board_state = self._get_board_state()
         return empty_cells, board_state
