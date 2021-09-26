@@ -10,10 +10,26 @@ class TicTacEnvironment:
         self.is_over = False
 
     def reset(self) -> Tuple[np.ndarray, str]:
+        """Resets an environment
+        
+        Returns:
+            Tuple[np.ndarray, str]: empty cells and board state as a str
+        """
         self.__init__()
         return self._get_state()
 
     def step(self, cell: int, sign: int) -> Tuple[int, np.ndarray, str]:
+        """Gets action from agent. Fills cell with sign
+        
+        Args:
+            cell: number of cell
+            sign: sign to fill the chosen cell
+        
+        Returns:
+            reward: float value of reward
+            board_state as a tuple of (empty_cells, board_state)
+            self.is_over: True if game is over otherwise False.
+        """
         self._set_sign(cell, sign)
         reward = self._get_reward()
         empty_cells, board_state = self._get_state()
@@ -25,11 +41,24 @@ class TicTacEnvironment:
         return empty_cells, board_state
 
     def _get_board_state(self):
+        """Represents board state as string to use it as a dictionary key.
+        
+        Returns:
+            str: board state repr
+        """
         state = self.board.ravel().astype(str).tolist()
         state = "".join(state)
         return state
 
     def _check_if_game_is_over(self) -> Tuple[bool, int]:
+        """Checks if game is over.
+        Gets info about all possible win combos.
+        If there is no winner checks for empty cells.
+
+        Returns:
+            bool: whether game is over or no
+            int: amount of empty cells
+        """
         diagonal = self.board.diagonal()
         anti_diag = np.fliplr(self.board).diagonal()
         combinations_sum = np.abs(

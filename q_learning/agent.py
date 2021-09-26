@@ -87,7 +87,8 @@ class QAgent(BaseAgent):
         Args:
             empty_cells: list of empty cells on a tic tac toe board
             board_state: string representing a current state in a board
-            policy_value: float value for testing purposes
+            policy_value: float value for testing purposes. Set this to 1
+                if you want to always get exploitation.
         Returns:
             action: index of cell
             sign: sign to be placed on an action cell
