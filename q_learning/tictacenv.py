@@ -11,7 +11,7 @@ class TicTacEnvironment:
 
     def reset(self) -> Tuple[np.ndarray, str]:
         """Resets an environment
-        
+
         Returns:
             Tuple[np.ndarray, str]: empty cells and board state as a str
         """
@@ -20,11 +20,11 @@ class TicTacEnvironment:
 
     def step(self, cell: int, sign: int) -> Tuple[int, np.ndarray, str]:
         """Gets action from agent. Fills cell with sign
-        
+
         Args:
             cell: number of cell
             sign: sign to fill the chosen cell
-        
+
         Returns:
             reward: float value of reward
             board_state as a tuple of (empty_cells, board_state)
@@ -42,7 +42,7 @@ class TicTacEnvironment:
 
     def _get_board_state(self):
         """Represents board state as string to use it as a dictionary key.
-        
+
         Returns:
             str: board state repr
         """
