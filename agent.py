@@ -53,7 +53,7 @@ class RandomAgent(BaseAgent):
 
 class QAgent(BaseAgent):
     def __init__(
-        self, sign: int, file_name: str, epsilon_policy, lr: float = 0.01
+        self, sign: int, file_name: str, epsilon_policy, lr: float = 0.1
     ):
         """Creates agent instance. Agent movements random are not random
         all the time. Randomness controls by an `epsilon_policy` arg. 
@@ -71,7 +71,7 @@ class QAgent(BaseAgent):
         self.file_name = file_name
         self.epsilon_policy = epsilon_policy
         self.lr = lr
-        self.decay_gamma = 0.9
+        self.discount = 0.8
         self.reward = 0.0
         self.amount_of_wins = 0
         self._init_q_matrix()
@@ -93,9 +93,9 @@ class QAgent(BaseAgent):
         """
         threshold = policy_value or self.epsilon_policy.get_epsilon()
         if random.uniform(0, 1) < threshold:
-            action = self._explore(empty_cells, board_state)
-        else:
             action = self._exploit(empty_cells, board_state)
+        else:
+            action = self._explore(empty_cells, board_state)
         return (action, self.sign)
 
     def set_reward(self, reward: float):
@@ -111,9 +111,10 @@ class QAgent(BaseAgent):
         last_move = self.last_move
         q_values = self.q_matrix[board_state]
         q_value = q_values[last_move]
-        new_q_value = (1 - self.lr) * q_value + self.lr * (reward + self.discount * )
-        q_value += self.lr * (self.decay_gamma * reward - q_value)
-        q_values[last_move] = q_value
+        max_q_value = np.max(q_values)
+        new_q_value = (1 - self.lr) * q_value + self.lr * (reward + self.discount * max_q_value)
+        # q_value += self.lr * (self.decay_gamma * reward - q_value)
+        q_values[last_move] = new_q_value
         self.q_matrix[self.last_board_state] = q_values
 
     def _exploit(self, empty_cells: np.ndarray, board_state: str) -> int:
