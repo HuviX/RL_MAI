@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import Tuple
 
 import numpy as np
 
@@ -96,7 +96,7 @@ class TicTacEnvironment:
 
     def _get_empty_cells(self) -> np.ndarray:
         """Return empty cells indices
-        
+
         Returns:
             empty_cells: np.ndarray of empty cells indices
         """
@@ -105,8 +105,7 @@ class TicTacEnvironment:
         return empty_cells
 
     def _set_sign(self, cell: int, sign: int):
-        """Sets sign to a given cell on a board
-        """
+        """Sets sign to a given cell on a board"""
         board = self.board.ravel()
         board[cell] = sign
         self.board = board.reshape((3, 3))

@@ -174,7 +174,7 @@ class QAgent(BaseAgent):
 class ConstantEpsilonFunction:
     def __init__(self, start_value: float):
         """Returns constant value of epsilon.
-        
+
         Args:
             start_value: threshold value
         """
@@ -200,7 +200,7 @@ class GrowthEpsilonFunction:
         self.iter = 0
 
     def get_epsilon(self) -> float:
-        """Returns T value given the formula T = exp^{-i * mult} where 
+        """Returns T value given the formula T = exp^{-i * mult} where
         i is the iteration number and mult is a multiplier that controls
         value growth.
 
