@@ -29,8 +29,6 @@ class RandomAgent(BaseAgent):
 
         Args:
             sign: sign to play (-1 or 1)
-        Returns:
-            RandomAgent instance
         """
         self.sign = sign
         self.reward = 0.0
@@ -52,10 +50,16 @@ class RandomAgent(BaseAgent):
 
 class QAgent(BaseAgent):
     def __init__(
-        self, sign: int, file_name: str, epsilon_policy, lr: float = 0.1
+        self,
+        sign: int,
+        file_name: str,
+        epsilon_policy,
+        lr: float = 0.1,
+        discount: float = 0.8,
     ):
         """Creates agent instance. Agent movements random are not random
         all the time. Randomness controls by an `epsilon_policy` arg.
+        link: `https://en.wikipedia.org/wiki/Q-learning`
 
         Args:
             sign: sign to play (-1 or 1)
@@ -63,14 +67,13 @@ class QAgent(BaseAgent):
             epsilon_policy: Epsilon Policy class instance. Controls
                 exploration/exploitation policy.
             lr: learning rate for q learning
-        Returns:
-            QAgent instance
+            discount: discount (gamma) factor in q learning formula
         """
         self.sign = sign
         self.file_name = file_name
         self.epsilon_policy = epsilon_policy
         self.lr = lr
-        self.discount = 0.8
+        self.discount = discount
         self.reward = 0.0
         self.amount_of_wins = 0
         self._init_q_matrix()
@@ -117,9 +120,8 @@ class QAgent(BaseAgent):
         new_q_value = (1 - self.lr) * q_value + self.lr * (
             reward + self.discount * max_q_value
         )
-        # q_value += self.lr * (self.decay_gamma * reward - q_value)
         q_values[last_move] = new_q_value
-        self.q_matrix[self.last_board_state] = q_values
+        self.q_matrix[board_state] = q_values
 
     def _exploit(self, empty_cells: np.ndarray, board_state: str) -> int:
         """Performs action choice based on a q matrix
@@ -158,41 +160,54 @@ class QAgent(BaseAgent):
         """
         self.q_matrix = defaultdict(lambda: np.zeros(9, dtype=float))
 
-    def dump_q_matrix(self, filename: str):
+    def dump_q_matrix(self):
         """Dumps q matrix to a file.
 
         Args:
             filename: file to store q matrix
         """
         q_matrix = dict(self.q_matrix)
-        with open(filename, "wb") as f:
+        with open(self.filename, "wb") as f:
             pickle.dump(q_matrix, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 class ConstantEpsilonFunction:
     def __init__(self, start_value: float):
+        """Returns constant value of epsilon.
+        
+        Args:
+            start_value: threshold value
+        """
         self.start_value = start_value
 
     def get_epsilon(self) -> float:
         return self.start_value
 
-    @property
-    def get_iter(self):
-        return self.iter
 
+class GrowthEpsilonFunction:
+    def __init__(self, mult: float):
+        """Controls exploration/exploitation trade-off.
+        Changes epsilon value over learning process.
+        The more iteration done the less random steps agent makes.
+        Given the formula T = exp^{-i * mult}.
+        i - iteration number
+        mult - a multiplier that controls value growth
 
-class DecayEpsilonFunction:
-    def __init__(self, start_value: float, min_value: float, mult: float):
-        self.start_value = start_value
-        self.min_value = min_value
+        Args:
+            mult: a multiplier that controls value growth
+        """
         self.mult = mult
         self.iter = 0
 
     def get_epsilon(self) -> float:
-        epsilon = np.exp(-self.iter * self.mult)
-        self.iter += 1
-        return max(self.min_value, epsilon)
+        """Returns T value given the formula T = exp^{-i * mult} where 
+        i is the iteration number and mult is a multiplier that controls
+        value growth.
 
-    @property
-    def get_iter(self):
-        return self.iter
+        Returns:
+            epsilon: float value of threshold to control
+        exploration/exploitation.
+        """
+        epsilon = 1 - np.exp(-self.iter * self.mult)
+        self.iter += 1
+        return epsilon

@@ -6,7 +6,6 @@ import numpy as np
 class TicTacEnvironment:
     def __init__(self):
         self.board = np.zeros((3, 3), dtype=int)
-        self.num_actions = 0
         self.is_over = False
 
     def reset(self) -> Tuple[np.ndarray, str]:
@@ -36,6 +35,9 @@ class TicTacEnvironment:
         return reward, (empty_cells, board_state), self.is_over
 
     def _get_state(self) -> Tuple[np.ndarray, str]:
+        """Returns list of empty_cells indices
+        and string board state representation
+        """
         empty_cells = self._get_empty_cells()
         board_state = self._get_board_state()
         return empty_cells, board_state
@@ -50,10 +52,10 @@ class TicTacEnvironment:
         state = "".join(state)
         return state
 
-    def _check_if_game_is_over(self) -> Tuple[bool, int]:
+    def _check_if_game_is_over(self) -> bool:
         """Checks if game is over.
         Gets info about all possible win combos.
-        If there is no winner checks for empty cells.
+        Gets amount of empty cells on a board
 
         Returns:
             bool: whether game is over or no
@@ -69,15 +71,20 @@ class TicTacEnvironment:
                 np.sum(self.board, axis=1),
             ]
         )
-        board = self.board.ravel()
 
         if any(np.abs(combinations_sum) == 3):
-            return True, np.where(board == 0)[0].size
-
-        return False, np.where(board == 0)[0].size
+            return True
+        return False
 
     def _get_reward(self) -> int:
-        win, empties = self._check_if_game_is_over()
+        """Returns the reward value and sets flag if game is over
+
+        Returns:
+            reward: reward value for an agent
+        """
+        win = self._check_if_game_is_over()
+        empties = self._get_empty_cells().size
+
         if win:
             self.is_over = True
             reward = 1.0
@@ -88,11 +95,18 @@ class TicTacEnvironment:
         return reward
 
     def _get_empty_cells(self) -> np.ndarray:
+        """Return empty cells indices
+        
+        Returns:
+            empty_cells: np.ndarray of empty cells indices
+        """
         board = self.board.ravel()
-        return np.where(board == 0)[0]
+        empty_cells = np.where(board == 0)[0]
+        return empty_cells
 
     def _set_sign(self, cell: int, sign: int):
-        self.num_actions += 1
+        """Sets sign to a given cell on a board
+        """
         board = self.board.ravel()
         board[cell] = sign
         self.board = board.reshape((3, 3))
