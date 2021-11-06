@@ -31,26 +31,8 @@ class TicTacEnvironment:
         """
         self._set_sign(cell, sign)
         reward = self._get_reward()
-        empty_cells, board_state = self._get_state()
-        return reward, (empty_cells, board_state), self.is_over
-
-    def _get_state(self) -> Tuple[np.ndarray, str]:
-        """Returns list of empty_cells indices
-        and string board state representation
-        """
-        empty_cells = self._get_empty_cells()
-        board_state = self._get_board_state()
-        return empty_cells, board_state
-
-    def _get_board_state(self):
-        """Represents board state as string to use it as a dictionary key.
-
-        Returns:
-            str: board state repr
-        """
-        state = self.board.ravel().astype(str).tolist()
-        state = "".join(state)
-        return state
+        state = self._get_state()
+        return reward, state, self.is_over
 
     def _check_if_game_is_over(self) -> bool:
         """Checks if game is over.
@@ -83,7 +65,7 @@ class TicTacEnvironment:
             reward: reward value for an agent
         """
         win = self._check_if_game_is_over()
-        empties = self._get_empty_cells().size
+        empties = self._get_state().size
 
         if win:
             self.is_over = True
@@ -94,7 +76,7 @@ class TicTacEnvironment:
             self.is_over = True
         return reward
 
-    def _get_empty_cells(self) -> np.ndarray:
+    def _get_state(self) -> np.ndarray:
         """Return empty cells indices
 
         Returns:

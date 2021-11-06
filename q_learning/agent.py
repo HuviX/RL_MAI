@@ -7,23 +7,30 @@ from numpy import random
 
 
 class BaseAgent:
-    def __init__(self, sign: int, file_name: str):
-        self.sign = sign
-        self.file_name = file_name
-
-    def get_action(self, env):
+    def __init__(self, what_figure, state, file_name):
+        # чем ходим what_figure = 1 - крестик , 0 - нолик
+        # state - список списков - доска 3x3 [[-1,-1,-1], [-1,-1,-1], [-1,-1,-1]]
+        #                           крестик - 1, нолик - 0, пусто - -1
+        # агент сохраняет необходимую информацию в файл c именем file_name
         raise NotImplementedError(
             "You can't call method from an abstract class itself"
         )
 
-    def set_reward(self, reward: int, state, done: bool):
+    def get_action(self):
+        raise NotImplementedError(
+            "You can't call method from an abstract class itself"
+        )
+
+    def set_reward_and_state(self, reward, state, done):
+        # reward - 0 - не выиграл, 1- выиграл
+        # done - 0 - игра продолжается, 1 - игра окончена
         raise NotImplementedError(
             "You can't call method from an abstract class itself"
         )
 
 
 class RandomAgent(BaseAgent):
-    def __init__(self, sign: int):
+    def __init__(self, sign: int, state: np.ndarray):
         """Creates agent instance.
         This agent movements are random all the time
 
@@ -33,8 +40,20 @@ class RandomAgent(BaseAgent):
         self.sign = sign
         self.reward = 0.0
         self.amount_of_wins = 0
+        self.state = state
+    
+    def get_action(self):
+        return None
+    
+    def set_reward_and_state(self, reward, state, done):
+        self.set_reward(reward)
+        self.done = done
+        self.state = state
 
-    def get_action(self, empty_cells, *args):
+    def get_action(self, *args):
+        return self._get_action(self.state)
+
+    def _get_action(self, empty_cells, *args):
         action = self._explore(empty_cells)
         return (action, self.sign)
 
@@ -52,8 +71,9 @@ class QAgent(BaseAgent):
     def __init__(
         self,
         sign: int,
-        file_name: str,
-        epsilon_policy,
+        filename: str,
+        state: np.ndarray,
+        epsilon_policy = None,
         lr: float = 0.1,
         discount: float = 0.8,
     ):
@@ -70,37 +90,50 @@ class QAgent(BaseAgent):
             discount: discount (gamma) factor in q learning formula
         """
         self.sign = sign
-        self.file_name = file_name
-        self.epsilon_policy = epsilon_policy
+        self.filename = filename
         self.lr = lr
         self.discount = discount
         self.reward = 0.0
         self.amount_of_wins = 0
+        self.state = state
+
+        if not epsilon_policy:
+            epsilon_policy = ConstantEpsilonFunction()
+        self.epsilon_policy = epsilon_policy
         self._init_q_matrix()
 
-    def get_action(
+    def set_reward_and_state(self, reward, state, done):
+        self.set_reward(reward)
+        self.done = done
+        self.state = state
+
+    def get_action(self, epsilon_value: float = None):
+        return self._get_action(self.state, epsilon_value)
+
+    def _get_action(
         self,
-        empty_cells: np.ndarray,
-        board_state: str,
+        state: np.ndarray,
         policy_value: float = None,
     ) -> Tuple[int, int]:
         """Returns an action based on a board state and empty cells
             of environment. Decides wheter agent need to play randomly or
             exploit its knowledge.
         Args:
-            empty_cells: list of empty cells on a tic tac toe board
-            board_state: string representing a current state in a board
+            state: list of empty cells on a tic tac toe board
             policy_value: float value for testing purposes. Set this to 1
                 if you want to always get exploitation.
         Returns:
             action: index of cell
             sign: sign to be placed on an action cell
         """
+        board_state = state.ravel().astype(str).tolist()
+        board_state = "".join(board_state)
+
         threshold = policy_value or self.epsilon_policy.get_epsilon()
         if random.uniform(0, 1) < threshold:
-            action = self._exploit(empty_cells, board_state)
+            action = self._exploit(state, board_state)
         else:
-            action = self._explore(empty_cells, board_state)
+            action = self._explore(state, board_state)
         return (action, self.sign)
 
     def set_reward(self, reward: float):
@@ -172,7 +205,7 @@ class QAgent(BaseAgent):
 
 
 class ConstantEpsilonFunction:
-    def __init__(self, start_value: float):
+    def __init__(self, start_value: float = 0.2):
         """Returns constant value of epsilon.
 
         Args:
