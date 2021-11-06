@@ -9,7 +9,7 @@ from numpy import random
 class BaseAgent:
     def __init__(self, what_figure, state, file_name):
         # чем ходим what_figure = 1 - крестик , 0 - нолик
-        # state - список списков - доска 3x3 [[-1,-1,-1], [-1,-1,-1], [-1,-1,-1]]
+        # state - список списков - доска 3x3 [[-1,-1,-1], [-1,-1,-1], [-1,-1,-1]]  # noqa
         #                           крестик - 1, нолик - 0, пусто - -1
         # агент сохраняет необходимую информацию в файл c именем file_name
         raise NotImplementedError(
@@ -41,10 +41,7 @@ class RandomAgent(BaseAgent):
         self.reward = 0.0
         self.amount_of_wins = 0
         self.state = state
-    
-    def get_action(self):
-        return None
-    
+
     def set_reward_and_state(self, reward, state, done):
         self.set_reward(reward)
         self.done = done
@@ -73,7 +70,7 @@ class QAgent(BaseAgent):
         sign: int,
         filename: str,
         state: np.ndarray,
-        epsilon_policy = None,
+        epsilon_policy=None,
         lr: float = 0.1,
         discount: float = 0.8,
     ):
